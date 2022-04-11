@@ -18,7 +18,7 @@ app.use(bodyparser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 
 const CONNECTION_URL = 'mongodb+srv://wallflourbakehouse:JINlamfQDoLCB6h3@cluster0.dfab7.mongodb.net/WallFlourBakeHouseDb?retryWrites=true&w=majority'
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use('/user', userRoutes)
 app.use('/product', productRoutes)
