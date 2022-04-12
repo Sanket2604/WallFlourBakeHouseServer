@@ -13,9 +13,13 @@ import messageRoutes from './routes/messages.js'
 
 const app = express();
 
-app.use(bodyparser.json({ limit: "30mb", extended: true }));
-app.use(bodyparser.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors());
+app.use(bodyparser.json({ limit: "100mb", extended: true }));
+app.use(bodyparser.urlencoded({ limit: "100mb", extended: true }));
+
+app.use(cors({
+    origin: 'https://zen-rosalind-30f7a7.netlify.app',
+    method: ['GET', 'POST', 'PUT', 'DELETE']
+}));
 
 const CONNECTION_URL = 'mongodb+srv://wallflourbakehouse:JINlamfQDoLCB6h3@cluster0.dfab7.mongodb.net/WallFlourBakeHouseDb?retryWrites=true&w=majority'
 const PORT = process.env.PORT || 5000;
