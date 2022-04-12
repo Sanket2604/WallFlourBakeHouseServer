@@ -17,7 +17,7 @@ app.use(bodyparser.json({ limit: "100mb", extended: true }));
 app.use(bodyparser.urlencoded({ limit: "100mb", extended: true }));
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://zen-rosalind-30f7a7.netlify.app/'],
+    origin: ['http://localhost:3000', 'https://zen-rosalind-30f7a7.netlify.app'],
     method: ['GET', 'POST', 'PUT', 'DELETE'],
     optionsSuccessStatus: 200
 }));
