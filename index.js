@@ -10,6 +10,7 @@ import preferenceRoutes from './routes/preference.js'
 import cartRoutes from './routes/cart.js'
 import orderRoutes from './routes/order.js'
 import messageRoutes from './routes/messages.js'
+import adminRoutes from './adminRoutes/home.js'
 
 const app = express();
 
@@ -17,7 +18,7 @@ app.use(bodyparser.json({ limit: "100mb", extended: true }));
 app.use(bodyparser.urlencoded({ limit: "100mb", extended: true }));
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://zen-rosalind-30f7a7.netlify.app'],
+    origin: ['http://localhost:3000', 'https://zen-rosalind-30f7a7.netlify.app', 'https://adoring-ride-5bf57d.netlify.app'],
     method: ['GET', 'POST', 'PUT', 'DELETE'],
     optionsSuccessStatus: 200
 }));
@@ -33,6 +34,8 @@ app.use('/preference', preferenceRoutes)
 app.use('/cart', cartRoutes)
 app.use('/order', orderRoutes)
 app.use('/message', messageRoutes)
+
+app.use('/admin', adminRoutes)
 
 
 mongoose.connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })

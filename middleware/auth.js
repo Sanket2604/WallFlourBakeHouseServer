@@ -11,7 +11,6 @@ export const auth = async (req, res, next) => {
 
         next();
     } catch (error) {
-        console.log(error)
         res.status(403).json({ message: 'Authentication Failed'})
     }
 }
@@ -26,13 +25,16 @@ export const admin_auth = async (req, res, next) => {
 
         const userId = decodedData?.id
 
-        const user = await User.findOne({ '_id': userId });
+        const user = await User.findById(userId);
 
-        if(user.role!=="admin") return res.status(400).json({ message: "Access Denied" })
+        if(!user) return res.status(404).jso({ message: "User not found" })
 
+        if(user.role!=="admin") return res.status(403).json({ message: "Access Denied" })
+        
         next();
     } catch (error) {
         console.log(error)
+        res.status(403).json({ message: 'Authentication Failed'})
     }
 }
 
