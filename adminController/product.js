@@ -49,23 +49,26 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
 
     try{
-        const currentCategory = await Category.findById(req.params.catId)
+        const currentCategory = await Category.findById(req.params.catId).populate('categoryProducts')
         if(!currentCategory) return res.status(404).json({ message: "Category Does Not Exists" })
-        const users = await User.find({})
-        let productsToDelete = []
-        currentCategory.categoryProducts.map((prod)=>{
-            users.map((user)=>{
-                if(user.favourites.length>0){
-                    user.favourites.filter((fav)=>{
-                        return fav.toString() !== prod
-                    })
-                }
-            })
-            productsToDelete.push(prod)
-        })
-        await Product.deleteMany({_id: { $in: productsToDelete}})
-        await Category.findByIdAndDelete(req.params.catId)
+        if(currentCategory.categoryProducts.length>0) return res.status(400).json({ message: "Remove All "+currentCategory.categoryProducts.length+" Products from the Category" })
+        currentCategory.deleted=true
+        currentCategory.save()
         res.status(200).json({ message: "Category Deleted Successfully" })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({ message: 'Something went wrong '})
+    }
+}
+
+export const restoreCategory = async (req, res) => {
+
+    try{const currentCategory = await Category.findById(req.params.catId).populate('categoryProducts')
+        if(!currentCategory) return res.status(404).json({ message: "Category Does Not Exists" })
+        currentCategory.deleted=false
+        currentCategory.save()
+        res.status(200).json({ message: "Category Restored Successfully" })
     }
     catch(error){
         console.log(error)
@@ -149,27 +152,29 @@ export const deleteProduct = async (req, res) => {
     try{
         const productToDelete = await Product.findById(prodId)
         if(!productToDelete) res.status(404).json({ message: "Product Does Not Exist" })
-        const users = await User.find({})
-        const allCategory = await Category.find({})
-        users.map((user)=>{
-            if(user.favourites.length>0){
-                user.favourites.filter((fav)=>{
-                    return fav.toString() !== prodId
-                })
-            }            
-        })
-        allCategory.map((category)=>{
-            if(category.categoryName===productToDelete.categoryName){
-                category.categoryProducts.filter((cat)=>{
-                    return cat.toString() !== prodId
-                })
-            }
-        })
-        await Product.findByIdAndDelete(prodId)
+        productToDelete.deleted=true
+        productToDelete.save()
         res.status(200).json({ message: "Product Deleted Successfully" })
     }
     catch(error){
+        console.log(error)
         res.status(500).json({ message: 'Something went wrong '})
     }
 }
 
+export const restoreProduct = async (req, res) => {
+
+    const prodId = req.params.prodId
+    
+    try{
+        const productToDelete = await Product.findById(prodId)
+        if(!productToDelete) res.status(404).json({ message: "Product Does Not Exist" })
+        productToDelete.deleted=false
+        productToDelete.save()
+        res.status(200).json({ message: "Product Restored Successfully" })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({ message: 'Something went wrong '})
+    }
+}

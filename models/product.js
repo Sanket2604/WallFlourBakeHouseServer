@@ -15,6 +15,7 @@ const productSchema = mongoose.Schema({
     customisation: { type: Boolean, default: false },
     batchSize: { type: String, required: true },
     comments: [ { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' } ],
+    deleted: { type: Boolean, default: false},
     unitsSold: { type: Number, default: 0 },
 },{
     timestamps: true,
