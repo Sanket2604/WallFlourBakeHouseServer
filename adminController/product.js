@@ -1,5 +1,77 @@
+import User from '../models/user.js'
 import Product from '../models/product.js'
 import Category from '../models/category.js'
+
+export const getAllCategories = async(req, res) =>{
+    try{
+        const allCategories = await Category.find({})
+        res.status(200).json(allCategories)
+    } catch(error){
+        res.status(500).json({ message: 'Something went wrong'})
+    }
+}
+
+export const postCategory = async (req, res) => {
+
+    const { categoryName } = req.body;
+    try{
+        const existingCategory = await Category.findOne({ categoryName: categoryName });
+        if(existingCategory) return res.status(400).json({ message: "Category Name Already Exists" })
+        await Category.create({ categoryName })
+        res.status(200).json({ message: "Category Added Successfully" })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({ message: 'Something went wrong '})
+    }
+}
+
+export const updateCategory = async (req, res) => {
+
+    const body = req.body;
+    try{
+        const currentCategory = await Category.findById(req.params.catId).populate('categoryProducts')
+        if(!currentCategory) return res.status(404).json({ message: "Category Does Not Exists" })
+        const existingNewCategory = await Category.find({categoryName: body.categoryName})
+        if(existingNewCategory) return res.status(400).json({ message: "Category Already Exists" })
+        currentCategory.categoryProducts.map((prod)=>{
+            prod.productCategory=body.categoryName
+            prod.save()
+        })
+        await Category.findByIdAndUpdate(req.params.catId, body, {new: true})
+        res.status(200).json({ message: "Category Updated Successfully" })
+    }
+    catch(error){
+        res.status(500).json({ message: 'Something went wrong'})
+    }
+}
+
+export const deleteCategory = async (req, res) => {
+
+    try{
+        const currentCategory = await Category.findById(req.params.catId)
+        if(!currentCategory) return res.status(404).json({ message: "Category Does Not Exists" })
+        const users = await User.find({})
+        let productsToDelete = []
+        currentCategory.categoryProducts.map((prod)=>{
+            users.map((user)=>{
+                if(user.favourites.length>0){
+                    user.favourites.filter((fav)=>{
+                        return fav.toString() !== prod
+                    })
+                }
+            })
+            productsToDelete.push(prod)
+        })
+        await Product.deleteMany({_id: { $in: productsToDelete}})
+        await Category.findByIdAndDelete(req.params.catId)
+        res.status(200).json({ message: "Category Deleted Successfully" })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({ message: 'Something went wrong '})
+    }
+}
 
 export const allProducts = async(req, res) => {
 
@@ -11,11 +83,93 @@ export const allProducts = async(req, res) => {
     }
 }
 
-export const getAllCategories = async(req, res) =>{
+export const postProduct = async (req, res) => {
+
+    const prodDetails = req.body;
     try{
-        const allCategories = await Category.find({})
-        res.status(200).json(allCategories)
-    } catch(error){
+        const existingProduct = await Product.findOne({ productName: prodDetails.productName });
+        if(existingProduct) return res.status(404).json({ message: "Product Name Already Exists" })
+        const category = await Category.findOne({ categoryName: prodDetails.productCategory })
+        if(!category) return res.status(404).json({ message: "Category does not Exist" })
+        const addedProduct = await Product.create({
+            productName: prodDetails.productName,
+            productCategory: prodDetails.productCategory,
+            price: prodDetails.price,
+            discount: prodDetails.discount,
+            preference: prodDetails.preference,
+            typeOfDish: prodDetails.typeOfDish,
+            batchSize: prodDetails.batchSize,
+            customisation: prodDetails.customisation,
+            allergy: prodDetails.allergy,
+            quantity: prodDetails.quantity,
+            description: prodDetails.description,
+            image: prodDetails.image,
+        })
+        category.categoryProducts.unshift(addedProduct._id)
+        await category.save()
+        res.status(200).json({ message: "Product Added Successfully" })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({ message: 'Something went wrong '})
+    }
+}
+
+export const updateProduct = async (req, res) => {
+
+    const body = req.body;
+
+    try{
+        const existingProduct = await Product.findById(req.params.prodId);
+        if(!existingProduct) return res.status(404).json({ message: "Product Name Already Exists" })
+        if(existingProduct.productCategory!==body.productCategory){
+            const oldcategory = await Category.findOne({ categoryName: existingProduct.productCategory })
+            oldcategory.categoryProducts.forEach((cat,i)=>{
+                if(cat.toString() === existingProduct._id.toString()){
+                    oldcategory.categoryProducts.splice(i,1)
+                }
+            })
+            const newcategory = await Category.findOne({ categoryName: body.productCategory })
+            newcategory.categoryProducts.unshift(body._id)
+            oldcategory.save()
+            newcategory.save()
+        }
+        await Product.findByIdAndUpdate(req.params.prodId, body, {new: true})
+        res.status(200).json({ message: "Product Updated Successfully" })
+    }
+    catch(error){
         res.status(500).json({ message: 'Something went wrong'})
     }
 }
+
+export const deleteProduct = async (req, res) => {
+
+    const prodId = req.params.prodId
+    
+    try{
+        const productToDelete = await Product.findById(prodId)
+        if(!productToDelete) res.status(404).json({ message: "Product Does Not Exist" })
+        const users = await User.find({})
+        const allCategory = await Category.find({})
+        users.map((user)=>{
+            if(user.favourites.length>0){
+                user.favourites.filter((fav)=>{
+                    return fav.toString() !== prodId
+                })
+            }            
+        })
+        allCategory.map((category)=>{
+            if(category.categoryName===productToDelete.categoryName){
+                category.categoryProducts.filter((cat)=>{
+                    return cat.toString() !== prodId
+                })
+            }
+        })
+        await Product.findByIdAndDelete(prodId)
+        res.status(200).json({ message: "Product Deleted Successfully" })
+    }
+    catch(error){
+        res.status(500).json({ message: 'Something went wrong '})
+    }
+}
+
