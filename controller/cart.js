@@ -19,6 +19,11 @@ export const getCart = async (req, res) => {
             res.status(200).json(newCart)
         }
         else{
+            cart.cartItems.map((item, i)=>{
+                if(item.product.deleted){
+                    cart.cartItems.splice(i,1)
+                }
+            })
             let grandTotal=0
             cart.cartItems.map(item=>{
                 grandTotal+=item.total
@@ -42,6 +47,7 @@ export const addItemToCart = async (req,res) => {
         const cart = await Cart.findOne({user: req.userId})
         const product = await Products.findById(body.productId)
         if(!product) return res.status(404).json({ message: "Product doesn't exist" })
+        if(product.deleted) return res.status(400).json({ message: "The requested product has been deleted" })
         if(body.quantity>5 && body.quantity<1) return res.status(400).json({ message: "Invalid Quantity" })
         let total = (product.price-(product.price*product.discount*0.01))*body.quantity
         if(!cart){

@@ -64,7 +64,8 @@ export const deleteCategory = async (req, res) => {
 
 export const restoreCategory = async (req, res) => {
 
-    try{const currentCategory = await Category.findById(req.params.catId).populate('categoryProducts')
+    try{
+        const currentCategory = await Category.findById(req.params.catId).populate('categoryProducts')
         if(!currentCategory) return res.status(404).json({ message: "Category Does Not Exists" })
         currentCategory.deleted=false
         currentCategory.save()
@@ -127,12 +128,14 @@ export const updateProduct = async (req, res) => {
         if(!existingProduct) return res.status(404).json({ message: "Product Name Already Exists" })
         if(existingProduct.productCategory!==body.productCategory){
             const oldcategory = await Category.findOne({ categoryName: existingProduct.productCategory })
+            if(!oldcategory) return res.status(404).json({ message: "Old Category Not Found" })
             oldcategory.categoryProducts.forEach((cat,i)=>{
                 if(cat.toString() === existingProduct._id.toString()){
                     oldcategory.categoryProducts.splice(i,1)
                 }
             })
             const newcategory = await Category.findOne({ categoryName: body.productCategory })
+            if(!newcategory) return res.status(404).json({ message: "New Category Not Found" })
             newcategory.categoryProducts.unshift(body._id)
             oldcategory.save()
             newcategory.save()
@@ -151,8 +154,30 @@ export const deleteProduct = async (req, res) => {
     
     try{
         const productToDelete = await Product.findById(prodId)
-        if(!productToDelete) res.status(404).json({ message: "Product Does Not Exist" })
+        if(!productToDelete) return res.status(404).json({ message: "Product Does Not Exist" })
+        const categories = await Category.findOne({categoryName: productToDelete.productCategory})
+        if(!categories) return res.status(404).json({ message: "Category Not Found" })
+        categories.categoryProducts.map((prod,i)=>{
+            if(prod.toString()===prodId.toString()){
+                categories.categoryProducts.splice(i,1)
+            }
+        })
+        const trash = await Category.findOne({categoryName: "Trash"})
+        if(!trash) return res.status(404).json({ message: "Trash Not Found" })
+        trash.categoryProducts.unshift(prodId)
+        const users = await User.find({})
+        users.map(user=>{
+            user.favourites.map((fav,i)=>{
+                if(fav.toString()===prodId.toString()){
+                    user.favourites.splice(i,1)
+                }
+            })
+            user.save()
+        })
+        productToDelete.productCategory="Trash"
         productToDelete.deleted=true
+        categories.save()
+        trash.save()
         productToDelete.save()
         res.status(200).json({ message: "Product Deleted Successfully" })
     }
@@ -165,12 +190,27 @@ export const deleteProduct = async (req, res) => {
 export const restoreProduct = async (req, res) => {
 
     const prodId = req.params.prodId
-    
+    const body = req.body
     try{
-        const productToDelete = await Product.findById(prodId)
-        if(!productToDelete) res.status(404).json({ message: "Product Does Not Exist" })
-        productToDelete.deleted=false
-        productToDelete.save()
+        console.log(body)
+        const productToRestore = await Product.findById(prodId)
+        if(!productToRestore) return res.status(404).json({ message: "Product Does Not Exist" })
+        if(body.productCategory==="Trash") return res.status(404).json({ message: "Select A Category To Restore" })
+        const category = await Category.findOne({categoryName: body.productCategory})
+        if(!category) return res.status(404).json({ message: "New Category Not Found" })
+        const trash = await Category.findOne({categoryName: "Trash"})
+        if(!trash) return res.status(404).json({ message: "Trash Not Found" })
+        trash.categoryProducts.map((cat,i)=>{
+            if(cat.toString()===prodId.toString()){
+                trash.categoryProducts.splice(i,1)
+            }
+        })
+        category.categoryProducts.unshift(prodId)
+        productToRestore.productCategory= body.productCategory
+        productToRestore.deleted=false
+        trash.save()
+        category.save()
+        productToRestore.save()
         res.status(200).json({ message: "Product Restored Successfully" })
     }
     catch(error){

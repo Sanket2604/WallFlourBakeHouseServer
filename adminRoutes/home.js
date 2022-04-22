@@ -3,6 +3,7 @@ import { admin_auth } from '../middleware/auth.js'
 
 import { homeDashboard, changeOrderControl } from '../adminController/home.js';
 import { allProducts, getAllCategories, postCategory, updateCategory, deleteCategory, restoreCategory, postProduct, updateProduct, deleteProduct, restoreProduct } from '../adminController/product.js'
+import { postPreference, updatePreference, deletePreference } from '../adminController/preference.js';
 import { allUserData, oneUserData } from '../adminController/user.js';
 
 const router = express.Router();
@@ -22,6 +23,11 @@ router.delete('/deleteProduct/:prodId', admin_auth, deleteProduct)
 router.delete('/deleteCategory/:catId', admin_auth, deleteCategory)
 router.put('/restoreCategory/:catId', admin_auth, restoreCategory)
 router.put('/restoreProduct/:prodId', admin_auth, restoreProduct)
+
+// Preferences Routes
+router.post('/new_preference', admin_auth, postPreference)
+router.put('/updatePreference/:prefId', admin_auth, updatePreference)
+router.delete('/deletePreference/:prefId', admin_auth, deletePreference)
 
 // User Routes
 router.get('/allUserData', admin_auth, allUserData)
