@@ -152,6 +152,17 @@ export const userData = async (req, res) => {
     }
 }
 
+export const userDP = async (req, res) => {
+    const userId = req.userId
+    try{
+        const existingUser = await User.findById( userId );
+        if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
+        res.status(200).json(existingUser.dp)
+    } catch(error) {
+        res.status(500).json({ message: 'Something went wrong '})
+    }
+}
+
 export const userDataUpdate = async (req, res) => {
     const _id = req.userId
     const body  = req.body;
@@ -360,15 +371,5 @@ export const setUserDp = async (req,res) => {
     }catch(error){
         console.log(error)
         res.status(500).json({ message: 'Something went wrong'})
-    }
-}
-
-export const addDpToWebsite = async (req,res) => {
-    const body = req.body;
-    try{
-        await DP.create(body);
-        res.status(200).json({ message: 'Display picture added' })
-    }catch(error){
-        res.status(500).json({ message: 'Something went wrong' })
     }
 }

@@ -1,6 +1,7 @@
 import User from '../models/user.js'
 import Product from '../models/product.js'
 import Category from '../models/category.js'
+import Comment from '../models/comment.js'
 
 export const getAllCategories = async(req, res) =>{
     try{
@@ -151,7 +152,7 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
 
     const prodId = req.params.prodId
-    
+
     try{
         const productToDelete = await Product.findById(prodId)
         if(!productToDelete) return res.status(404).json({ message: "Product Does Not Exist" })
@@ -172,8 +173,17 @@ export const deleteProduct = async (req, res) => {
                     user.favourites.splice(i,1)
                 }
             })
+            productToDelete.comments.map((comment)=>{
+                user.comments.map((userComment,i)=>{
+                    if(comment.toString()===userComment.toString()){
+                        user.comments.splice(i,1)
+                    }
+                })
+            })
             user.save()
         })
+        await Comment.deleteMany({_id: { $in: productToDelete.comments}});
+        productToDelete.comments=[]
         productToDelete.productCategory="Trash"
         productToDelete.deleted=true
         categories.save()

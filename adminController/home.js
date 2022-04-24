@@ -23,7 +23,7 @@ export const homeDashboard = async(req, res) => {
         for(let i=0; i<currentMonthOrders.length; i++){
             totalSales+=currentMonthOrders[i].grandTotal
         }
-        const orderControl = await OrderControl.find({})
+        const orderControl = await OrderControl.findOne({})
 
         const comments = await Comment.find({})
         const currentMonthComments = comments.filter((comment)=>{
@@ -35,8 +35,6 @@ export const homeDashboard = async(req, res) => {
             let difference=moment().diff(moment(user.createdAt), 'days')
             return difference<7
         })
-        
-
         
         res.status(200).json({
             activeOrders, 

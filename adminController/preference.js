@@ -6,11 +6,12 @@ export const postPreference = async (req, res) => {
 
     const body = req.body;
     try{
-        const existingPreference = await Preference.findOne({ preferenceName: body.preferenceName });
+        const existingPreference = await Preference.findOne({ preferenceName: body.preferenceName })
         if(existingPreference) return res.status(404).json({ message: "Preference Name Already Exists" })
         await Preference.create(body)
         res.status(200).json({ message: "Preference Added Successfully" })
     } catch(error){
+        console.log(error)
         res.status(500).json({ message: 'Something went wrong'})
     }
 }
@@ -21,27 +22,32 @@ export const updatePreference = async (req, res) => {
     try{
         const existingPreference = await Preference.findById(req.params.prefId);
         if(!existingPreference) return res.status(404).json({ message: "Preference Does Not Exists" })
+        const samePreferenceName = await Preference.findOne({preferenceName: body.preferenceName})
+        if(samePreferenceName) return res.status(404).json({ message: "Preference Name Already Exists" })
         const users = await User.find({})
-        const allProducts = await Product.find({});
-        users.map((user)=>{
-            user.preference.map((pref,i)=>{
-                if(pref===existingPreference.preferenceName){
-                    pref=body.preferenceName
-                    user.save()
-                }
+        const allProducts = await Product.find({})
+        if(body.preferenceName!==existingPreference.preferenceName){
+            users.map((user)=>{
+                user.preference.map((pref,i)=>{
+                    if(pref===existingPreference.preferenceName){
+                        user.preference[i]=body.preferenceName
+                    }
+                })
+                user.save()
             })
-        })
-        allProducts.map((prod)=>{
-            prod.preference.map((pref,i)=>{
-                if(pref===existingPreference.preferenceName){
-                    pref=body.preferenceName
-                    prod.save()
-                }
+            allProducts.map((prod)=>{
+                prod.preference.map((pref,i)=>{
+                    if(pref===existingPreference.preferenceName){
+                        prod.preference[i]=body.preferenceName
+                    }
+                })
+                prod.save()
             })
-        })
+        }
         await Preference.findByIdAndUpdate(req.params.prefId, body, {new: true})
         res.status(200).json({ message: "Preference Added Successfully" })
     } catch(error){
+        console.log(error)
         res.status(500).json({ message: 'Something went wrong'})
     }
 }
@@ -55,15 +61,15 @@ export const deletePreference = async (req, res) => {
         const allProducts = await Product.find({});
         users.map((user)=>{
             user.preference.map((pref,i)=>{
-                if(pref===existingPreference.name){
-                    prod.preference.splice(i,1)
-                    prod.save()
+                if(pref===existingPreference.preferenceName){
+                    user.preference.splice(i,1)
+                    user.save()
                 }
             })
         })
         allProducts.map((prod)=>{
             prod.preference.map((pref,i)=>{
-                if(pref===existingPreference.name){
+                if(pref===existingPreference.preferenceName){
                     prod.preference.splice(i,1)
                     prod.save()
                 }

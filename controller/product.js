@@ -5,7 +5,7 @@ import Category from '../models/category.js'
 
 export const getHomeProducts = async (req, res) => {
     try{
-        const newProducts = await Products.find({}).sort({_id: -1}).limit(8)
+        const newProducts = await Products.find({}).sort({createdAt: -1}).limit(8)
         const topSelling = await Products.find({}).sort({unitsSold: -1}).limit(8)
         const topRated = await Products.find({}).sort({rating: -1}).limit(8)
         res.status(200).json({ newProducts, topSelling, topRated })
