@@ -1,15 +1,23 @@
 import mongoose from 'mongoose';
 
 const messageSchema = mongoose.Schema({
-    userId:{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    countryCode: { type: Number, required: true },
-    phoneNumber: { type: Number, required: true },
-    messages: [{
-        username: { type: String },
-        message: { type: String, required: true }
+    user:{ type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    name: { type: String },
+    email: { type: String },
+    countryCode: { type: Number },
+    phoneNumber: { type: Number },
+    conversation: [{
+        conversationDate: { type: Date, required: true},
+        messages: [{
+            username: { type: String },
+            message: { type: String, required: true },
+            delete: { type: Boolean },
+            role: { type: String },
+            time: { type: Date, required: true}
+        }]
     }],
+    unread: { type: Number, default: 0 },
+    userUnread: { type: Boolean, default: false}
 },{
     timestamps: true,
 })

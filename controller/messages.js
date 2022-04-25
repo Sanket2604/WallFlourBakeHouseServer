@@ -1,31 +1,43 @@
+import moment from 'moment';
 import Message from '../models/messages.js'
 import User from '../models/user.js'
 
 export const getUserMessage = async (req,res) => {
-    const body = req.body;
     try{
         const existingUser = await User.findById(req.userId);
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        const conversation = await Message.findOne({userId: existingUser._id});
-        res.status(200).json(conversation)
+        let conversations = await Message.findOne({userId: existingUser._id});
+        if(!conversations){
+            conversations = await Message.create({
+                user: existingUser._id,
+                conversation: []
+            })
+        }
+        if(conversations.userUnread) conversations.userUnread=false
+        conversations.save()
+        res.status(200).json(conversations)
     }
     catch(error){
         console.log(error)
         res.status(500).json({ message: 'Something went wrong' })
     }
-
 }
+
 export const strangerSendMessage = async (req,res) => {
     const body = req.body;
-    console.log(body)
     try{
-        const msg = await Message.create({
+        await Message.create({
             name: body.name,
             email: body.email,
             countryCode: body.countryCode,
             phoneNumber: body.phoneNumber,
-            messages: [{
-                message: body.message
+            conversation: [{
+                conversationDate: new Date(),
+                messages:[{
+                    message: body.message,
+                    role: "stranger",
+                    time:  new Date(),
+                }]
             }]
         })
         res.status(200).json({ message: 'Message Sent' })
@@ -39,13 +51,34 @@ export const userSendMessage = async (req,res) => {
     try{
         const existingUser = await User.findById(req.userId);
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        const conversation = await Message.findOne({userId: existingUser._id});
-        conversation.messages.push({
-            username: existingUser.username,
-            message: body.message
+        const conversations = await Message.findOne({userId: existingUser._id});
+        if(!conversations) return res.status(404).json({ message: "Can Not Find User Chat" })
+        let flag=0
+        conversations.conversation.map((conv)=>{
+            if(moment(conv.conversationDate).format("DD/MM/YYYY") === moment().format("DD/MM/YYYY")){
+                conv.messages.push({
+                    username: existingUser.username,
+                    message: body.message,
+                    role: "customer",
+                    time:  new Date()
+                })
+                flag=1
+            }
         })
-        conversation.save()
-        res.status(200).json(conversation)
+        if(flag===0){
+            conversations.conversation.push({
+                conversationDate: new Date(),
+                messages: [{
+                    username: existingUser.username,
+                    message: body.message,
+                    role: "customer",
+                    time:  new Date(),
+                }]
+            })
+        }
+        conversations.unread++
+        conversations.save()
+        res.status(200).json(conversations)
     }catch(error){
         console.log(error)
         res.status(500).json({ message: 'Something went wrong' })
