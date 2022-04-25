@@ -6,7 +6,7 @@ export const getUserMessage = async (req,res) => {
     try{
         const existingUser = await User.findById(req.userId);
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        let conversations = await Message.findOne({userId: existingUser._id});
+        let conversations = await Message.findOne({user: existingUser._id});
         if(!conversations){
             conversations = await Message.create({
                 user: existingUser._id,
