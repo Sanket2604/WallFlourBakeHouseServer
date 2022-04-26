@@ -21,7 +21,7 @@ export const login = async (req, res) => {
 
         const token = jwt.sign({ email: existingUser.email, id: existingUser._id }, 'AWorldFullOfLove', { expiresIn: 2189229120000})
 
-        res.status(200).json({ result: { username: existingUser.username, id: existingUser._id, dp: existingUser.dp }, token })
+        res.status(200).json({ token })
     } catch (error) {
         res.status(500).json({ message: 'Something went wrong '})
     }
@@ -115,16 +115,12 @@ export const signup = async (req, res) => {
             }
         }
         const result = await User.create(new_user)
-        const token = jwt.sign({ email: result.email, id: result._id }, 'AWorldFullOfLove', { expiresIn: 2189229120000 })
         await Message.create({
-            userId: result._id,
-            name: result.firstname+" "+result.lastname,
-            email: result.email,
-            countryCode: result.countryCode,
-            phoneNumber: result.phoneNumber,
-            messages: []
+            user: result._id,
+            conversation: []
         })
-        res.status(200).json({ result: { username: result.username, id: result._id, dp: result.dp }, token })
+        const token = jwt.sign({ email: result.email, id: result._id }, 'AWorldFullOfLove', { expiresIn: 2189229120000 })
+        res.status(200).json({ token })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Something went wrong '})
@@ -157,7 +153,7 @@ export const userDP = async (req, res) => {
     try{
         const existingUser = await User.findById( userId );
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        res.status(200).json(existingUser.dp)
+        res.status(200).json({dp: existingUser.dp, username: existingUser.username})
     } catch(error) {
         res.status(500).json({ message: 'Something went wrong '})
     }

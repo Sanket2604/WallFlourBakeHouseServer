@@ -8,7 +8,7 @@ export const getComment = async (req, res) => {
     try{
         const existingUser = await User.findOne({ _id: req.userId }).populate('comments')
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        res.status(200).json(existingUser.comments)
+        res.status(200).json({comments: existingUser.comments, username: existingUser.username, dp: existingUser.dp})
     } catch(error){
         res.status(500).json({ message: 'Something went wrong'})
     }

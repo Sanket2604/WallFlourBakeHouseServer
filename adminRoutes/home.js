@@ -4,7 +4,7 @@ import { admin_auth } from '../middleware/auth.js'
 import { homeDashboard, changeOrderControl } from '../adminController/home.js';
 import { allProducts, getAllCategories, postCategory, updateCategory, deleteCategory, restoreCategory, postProduct, updateProduct, deleteProduct, restoreProduct } from '../adminController/product.js'
 import { postPreference, updatePreference, deletePreference } from '../adminController/preference.js';
-import { allUserChats, viewUserMessages, adminSendMessage } from '../adminController/message.js'; 
+import { allUserChats, viewUserMessages, adminSendMessage, resetUnknownUserMessageCount, deleteStrangerMessage } from '../adminController/message.js'; 
 import { recentComments, deleteComments } from '../adminController/comment.js'; 
 import { allUserData, oneUserData, addDp, editDp, deleteDp } from '../adminController/user.js';
 
@@ -31,10 +31,12 @@ router.post('/new_preference', admin_auth, postPreference)
 router.put('/updatePreference/:prefId', admin_auth, updatePreference)
 router.delete('/deletePreference/:prefId', admin_auth, deletePreference)
 
-// Chat Routes
+// Messages Routes
 router.get('/allUserChats', admin_auth, allUserChats)
+router.get('/resetUUMC', admin_auth, resetUnknownUserMessageCount)
 router.post('/adminSendMessage', admin_auth, adminSendMessage)
 router.put('/viewUserMessages', admin_auth, viewUserMessages)
+router.delete('/deleteStrangerMessage/:msgId', admin_auth, deleteStrangerMessage)
 
 // Comments Routes
 router.get('/recentComments', admin_auth, recentComments)

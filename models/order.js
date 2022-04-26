@@ -11,17 +11,17 @@ const orderSchema = mongoose.Schema({
             product:{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
             customisation: { type: String, default: "" },
             quantity:{ type: Number, default: 1 },
-            preOrder: { type: String },
             total:{ type: Number, default: 0 }
         }
     ],
+    deliveryDate: { type: Date },
     couponCode: {type: String, default: "" },
     grandTotal: {
         type: Number,
         required: true
     },
     status: { type: String, default: "Order Pending Approval" },
-    paymentStatus: { type: String, default: "" },
+    paymentStatus: { type: String, default: "Pending" },
     shippingAddress: {   
         name: {type: String, required: true },
         countryCode: {type: Number, default: 91},

@@ -1,20 +1,33 @@
 import Message from "../models/messages.js"
 import User from '../models/user.js'
 import moment from 'moment'
+import OrderControl from '../models/order_control.js'
 
 export const allUserChats = async(req, res) => {
 
     try{
-        const allChats = await Message.find({}).populate('user')
+        const allChats = await Message.find({}).populate('user').sort({updatedAt: -1})
+        const orderControl = await OrderControl.findOne({})
         const knownChat = allChats.filter(chat=>{
             return chat.user
         })
         const unknownChat = allChats.filter(chat=>{
             return !chat.user
         })
-        res.status(200).json({knownChat, unknownChat})
+        res.status(200).json({knownChat, unknownChat, unknownUserMessageCount: orderControl.unknownUserMessageCount})
     } catch(error){
         console.log(error)
+        res.status(500).json({ message: 'Something went wrong'})
+    }
+}
+
+export const resetUnknownUserMessageCount = async(req, res) => {
+    try{
+        const orderControl = await OrderControl.findOne({})
+        orderControl.unknownUserMessageCount=0
+        orderControl.save()
+        res.status(200).json({ message: 'Unknown User Message Count Updated'})
+    } catch(error){
         res.status(500).json({ message: 'Something went wrong'})
     }
 }
@@ -68,5 +81,16 @@ export const adminSendMessage = async (req,res) => {
     }catch(error){
         console.log(error)
         res.status(500).json({ message: 'Something went wrong' })
+    }
+}
+
+export const deleteStrangerMessage = async(req, res) => {
+
+    try{
+        await Message.findByIdAndDelete(req.params.msgId)
+        res.status(200).json({ message: 'Message Successfully Deleted'})
+    } catch(error){
+        console.log(error)
+        res.status(500).json({ message: 'Something went wrong'})
     }
 }

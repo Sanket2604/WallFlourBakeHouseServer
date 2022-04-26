@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 
 const orderControlSchema = mongoose.Schema({
-    status: { type: Boolean, default: true },
+    status: { type: Boolean },
+    unknownUserMessageCount: { type: Number }
 },{
     timestamps: true,
 })

@@ -33,7 +33,7 @@ export const updateCategory = async (req, res) => {
     try{
         const currentCategory = await Category.findById(req.params.catId).populate('categoryProducts')
         if(!currentCategory) return res.status(404).json({ message: "Category Does Not Exists" })
-        const existingNewCategory = await Category.find({categoryName: body.categoryName})
+        const existingNewCategory = await Category.findOne({categoryName: body.categoryName})
         if(existingNewCategory) return res.status(400).json({ message: "Category Already Exists" })
         currentCategory.categoryProducts.map((prod)=>{
             prod.productCategory=body.categoryName
