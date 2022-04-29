@@ -1,6 +1,7 @@
 import Products from '../models/product.js'
 import User from '../models/user.js'
 import Cart from '../models/cart.js'
+import OrderControl from '../models/order_control.js'
 
 export const getCart = async (req, res) => {
 
@@ -14,9 +15,10 @@ export const getCart = async (req, res) => {
                 model: 'Product'
             }
         })
+        const orderControl = await OrderControl.findOne({})
         if(!cart){
             const newCart = await Cart.create({ user: existingUser._id, cartItems:[], grandTotal: 0})
-            res.status(200).json(newCart)
+            res.status(200).json({cart: newCart, openOrder: orderControl.status})
         }
         else{
             cart.cartItems.map((item, i)=>{
@@ -30,7 +32,7 @@ export const getCart = async (req, res) => {
             })
             cart.grandTotal=grandTotal
             cart.save()
-            res.status(200).json(cart)
+            res.status(200).json({cart, openOrder: orderControl.status})
         }
     } catch(error){
         console.log(error)

@@ -6,15 +6,20 @@ const orderSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    username: {type: String, required: true},
     orderItems:[
         {
-            product:{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            productName: {type: String, required: true},
+            productImage: {type: String, required: true},
+            productPrice: {type: Number, required: true},
+            discount: {type: Number, required: true},
             customisation: { type: String, default: "" },
             quantity:{ type: Number, default: 1 },
             total:{ type: Number, default: 0 }
         }
     ],
-    deliveryDate: { type: Date },
+    orderCancel: {type: Boolean, default: false},
+    deliveryDate: { type: String },
     couponCode: {type: String, default: "" },
     grandTotal: {
         type: Number,

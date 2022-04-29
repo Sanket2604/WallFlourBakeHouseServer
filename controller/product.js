@@ -1,5 +1,4 @@
 import Products from '../models/product.js'
-import Users from '../models/user.js'
 import Category from '../models/category.js'
 
 

@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const adminOrderSchema = mongoose.Schema({
     
-    orserDate: { type: Date, require: true},
+    orderDate: { type: String, require: true},
     orderList:[{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order',
@@ -12,5 +12,5 @@ const adminOrderSchema = mongoose.Schema({
     timestamps: true
 })
 
-const adminOrder = mongoose.model('AdminOrder', adminOrderSchema);
-export default adminOrder;
+const AdminOrder = mongoose.model('AdminOrder', adminOrderSchema);
+export default AdminOrder;

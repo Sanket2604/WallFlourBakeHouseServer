@@ -1,10 +1,11 @@
 import express from 'express';
 import { admin_auth } from '../middleware/auth.js'
 
-import { homeDashboard, changeOrderControl } from '../adminController/home.js';
+import { homeDashboard, changeOrderControl, login } from '../adminController/home.js';
 import { allProducts, getAllCategories, postCategory, updateCategory, deleteCategory, restoreCategory, postProduct, updateProduct, deleteProduct, restoreProduct } from '../adminController/product.js'
 import { postPreference, updatePreference, deletePreference } from '../adminController/preference.js';
 import { allUserChats, viewUserMessages, adminSendMessage, resetUnknownUserMessageCount, deleteStrangerMessage } from '../adminController/message.js'; 
+import { getActiveOrders, getOneOrder, updateStatus, updatePayment, getDateOrders, getDeliveredOrders, orderDelete, orderRestore } from '../adminController/orders.js'; 
 import { recentComments, deleteComments } from '../adminController/comment.js'; 
 import { allUserData, oneUserData, addDp, editDp, deleteDp } from '../adminController/user.js';
 
@@ -13,6 +14,7 @@ const router = express.Router();
 // Home Routes
 router.get('/home', admin_auth, homeDashboard)
 router.get('/changeOrderControl', admin_auth, changeOrderControl)
+router.post('/login', login)
 
 // Product Routes
 router.get('/allProducts', admin_auth, allProducts)
@@ -37,6 +39,17 @@ router.get('/resetUUMC', admin_auth, resetUnknownUserMessageCount)
 router.post('/adminSendMessage', admin_auth, adminSendMessage)
 router.put('/viewUserMessages', admin_auth, viewUserMessages)
 router.delete('/deleteStrangerMessage/:msgId', admin_auth, deleteStrangerMessage)
+
+// Orders Routes
+router.get('/getActiveOrders', admin_auth, getActiveOrders)
+router.get('/getOneOrder/:orderId', admin_auth, getOneOrder)
+router.get('/getDateOrders/:date', admin_auth, getDateOrders)
+router.get('/getDeliveredOrders/:date', admin_auth, getDeliveredOrders)
+router.put('/updateStatus/:orderId', admin_auth, updateStatus)
+router.put('/updatePayment/:orderId', admin_auth, updatePayment)
+router.delete('/orderDelete/:orderId', admin_auth, orderDelete)
+router.delete('/orderRestore/:orderId', admin_auth, orderRestore)
+
 
 // Comments Routes
 router.get('/recentComments', admin_auth, recentComments)
