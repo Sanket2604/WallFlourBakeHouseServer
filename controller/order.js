@@ -49,6 +49,22 @@ export const orderCancelation = async(req, res) => {
     }
 }
 
+
+export const orderRestore = async(req, res) => {
+
+    try{
+        const existingUser = await User.findById(req.userId);
+        if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
+        const order = await Order.findById(req.params.orderId).populate('user')
+        if(existingUser._id.toString()!==order.user._id.toString()) return res.status(403).json({ message: "Can Not Access Others Orders" })
+        order.orderCancel=false
+        order.save()
+        res.status(200).json({ message: 'Order Restored'})
+    } catch(error){
+        res.status(500).json({ message: 'Something went wrong'})
+    }
+}
+
 export const addUserOrder = async (req, res) => {
 
     const body=req.body

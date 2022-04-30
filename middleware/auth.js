@@ -29,11 +29,10 @@ export const admin_auth = async (req, res, next) => {
 
         if(!user) return res.status(404).jso({ message: "User not found" })
 
-        if(user.role!=="admin") return res.status(403).json({ message: "Access Denied" })
+        if(user.role!=="admin") return res.status(403).json({ message: "Authentication Failed" })
         
         next();
     } catch (error) {
-        console.log(error)
         res.status(403).json({ message: 'Authentication Failed'})
     }
 }

@@ -30,6 +30,13 @@ export const homeDashboard = async(req, res) => {
         const orders = await Order.find({}).populate('user')
         const todayDelivery = await Order.find({deliveryDate: today}).populate('user')
         const todayOrders = await AdminOrder.findOne({orderDate: today}).populate('orderList')
+        let todayOrderList
+        if(todayOrders){
+            todayOrderList=todayOrders.orderList
+        }
+        else{
+            todayOrderList=[]
+        }
         const currentMonthOrders = orders.filter((order)=>{
             return moment().format('MM')===moment(order.createdAt, 'YYYY/MM/DD').format('MM')
         })
@@ -58,7 +65,7 @@ export const homeDashboard = async(req, res) => {
             activeOrders, 
             orderControl,
             todayDelivery,
-            todayOrders: todayOrders.orderList,
+            todayOrders: todayOrderList,
             newUsers : currentMonthUsers,
             dashBoard: {
                 totalSales,
