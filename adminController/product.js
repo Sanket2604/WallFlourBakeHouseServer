@@ -183,6 +183,7 @@ export const deleteProduct = async (req, res) => {
             user.save()
         })
         await Comment.deleteMany({_id: { $in: productToDelete.comments}});
+        productToDelete.rating=5
         productToDelete.comments=[]
         productToDelete.productCategory="Trash"
         productToDelete.deleted=true

@@ -83,7 +83,7 @@ export const deleteComment = async (req, res) => {
         const rating = commentToDelete.rating
         let position
         existingUser.comments.map((comment, index)=>{
-            if(comment.toString()===commentId){
+            if(comment.toString()===commentId.toString()){
                 position=index
             }
         })
@@ -91,7 +91,7 @@ export const deleteComment = async (req, res) => {
         existingUser.save()
         
         product.comments.map((comment, index)=>{
-            if(comment.toString()===commentId){
+            if(comment.toString()===commentId.toString()){
                 position=index
             }
         })
