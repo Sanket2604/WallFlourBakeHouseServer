@@ -2,10 +2,6 @@ import mongoose from 'mongoose'
 
 const orderSchema = mongoose.Schema({
     
-    user:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    },
     username: {type: String, required: true},
     orderItems:[
         {
@@ -36,6 +32,16 @@ const orderSchema = mongoose.Schema({
         city: { type: String , required: true},
         pincode: { type: String , required: true},
         state: { type: String, required: true}
+    },
+    billingAddress: {
+        name: {type: String, required: true },
+        countryCode: {type: Number, default: 91},
+        phoneNumber: {type: Number, required: true},
+        address: { type: String, required: true },
+        landmark: { type: String, required: true },
+        city: { type: String, required: true },
+        pincode: { type: String, required: true },
+        state: { type: String, required: true },
     },
 },{
     timestamps: true

@@ -7,7 +7,7 @@ import { postPreference, updatePreference, deletePreference } from '../adminCont
 import { allUserChats, viewUserMessages, adminSendMessage, resetUnknownUserMessageCount, deleteStrangerMessage } from '../adminController/message.js'; 
 import { getActiveOrders, getOneOrder, updateStatus, updatePayment, getDateOrders, getDeliveredOrders, orderDelete, orderRestore } from '../adminController/orders.js'; 
 import { recentComments, deleteComments } from '../adminController/comment.js'; 
-import { allUserData, oneUserData, addDp, editDp, deleteDp } from '../adminController/user.js';
+import { allUserData, oneUserData, deleteUserData, addDp, editDp, deleteDp } from '../adminController/user.js';
 
 const router = express.Router();
 
@@ -58,6 +58,7 @@ router.delete('/deleteComment/:commentId', admin_auth, deleteComments)
 // User Routes
 router.get('/allUserData', admin_auth, allUserData)
 router.get('/oneUserData/:userId', admin_auth, oneUserData)
+router.delete('/deleteUserData/:userId', admin_auth, deleteUserData)
 
 router.post('/addDp', admin_auth, addDp)
 router.put('/updateDP/:dpID', admin_auth, editDp)

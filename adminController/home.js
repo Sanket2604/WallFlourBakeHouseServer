@@ -27,8 +27,8 @@ export const homeDashboard = async(req, res) => {
     let today=moment().format('DD/MM/YYYY')
 
     try{
-        const orders = await Order.find({}).populate('user')
-        const todayDelivery = await Order.find({deliveryDate: today}).populate('user')
+        const orders = await Order.find({})
+        const todayDelivery = await Order.find({deliveryDate: today})
         const todayOrders = await AdminOrder.findOne({orderDate: today}).populate('orderList')
         let todayOrderList
         if(todayOrders){

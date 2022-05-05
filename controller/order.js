@@ -26,8 +26,8 @@ export const getOneOrder = async(req, res) => {
     try{
         const existingUser = await User.findById(req.userId);
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        const order = await Order.findById(req.params.orderId).populate('user')
-        if(existingUser._id.toString()!==order.user._id.toString()) return res.status(403).json({ message: "Can Not Access Others Orders" })
+        const order = await Order.findById(req.params.orderId)
+        if(existingUser.username!==order.username) return res.status(403).json({ message: "Can Not Access Others Orders" })
         res.status(200).json(order)
     } catch(error){
         res.status(500).json({ message: 'Something went wrong'})
@@ -39,8 +39,8 @@ export const orderCancelation = async(req, res) => {
     try{
         const existingUser = await User.findById(req.userId);
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        const order = await Order.findById(req.params.orderId).populate('user')
-        if(existingUser._id.toString()!==order.user._id.toString()) return res.status(403).json({ message: "Can Not Access Others Orders" })
+        const order = await Order.findById(req.params.orderId)
+        if(existingUser.username!==order.username) return res.status(403).json({ message: "Can Not Access Others Orders" })
         order.orderCancel=true
         order.save()
         res.status(200).json(order)
@@ -55,8 +55,8 @@ export const orderRestore = async(req, res) => {
     try{
         const existingUser = await User.findById(req.userId);
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-        const order = await Order.findById(req.params.orderId).populate('user')
-        if(existingUser._id.toString()!==order.user._id.toString()) return res.status(403).json({ message: "Can Not Access Others Orders" })
+        const order = await Order.findById(req.params.orderId)
+        if(existingUser.username!==order.username) return res.status(403).json({ message: "Can Not Access Others Orders" })
         order.orderCancel=false
         order.save()
         res.status(200).json({ message: 'Order Restored'})
@@ -70,6 +70,17 @@ export const addUserOrder = async (req, res) => {
     const body=req.body
     let today=moment().format('DD/MM/YYYY')
     try{
+        const existingUser = await User.findById(req.userId);
+        if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
+        let billingAddress = existingUser.billingAddress
+        billingAddress = {
+            name: existingUser.firstname+" "+existingUser.lastname,
+            countryCode: existingUser.countryCode,
+            phoneNumber: existingUser.phoneNumber,
+            ...billingAddress
+        }
+        console.log(billingAddress)
+
         const presentOrder = await AdminOrder.findOne({orderDate: today})
         if(!presentOrder){
             await AdminOrder.create({
@@ -107,7 +118,8 @@ export const addUserOrder = async (req, res) => {
                 grandTotal: cart.grandTotal,
                 discount: cart.discount,
                 deliveryDate: cart.cartItems[0].preOrder,
-                shippingAddress: body.shippingAddress
+                shippingAddress: body.shippingAddress,
+                billingAddress: billingAddress
             })
             const adminOrderGroup = await AdminOrder.findOne({orderDate: today})
             adminOrderGroup.orderList.push(newOrder._id)
@@ -159,7 +171,8 @@ export const addUserOrder = async (req, res) => {
                         grandTotal: order.grandTotal,
                         discount: cart.discount,
                         deliveryDate: order.deliveryDate,
-                        shippingAddress: body.shippingAddress
+                        shippingAddress: body.shippingAddress,
+                        billingAddress: billingAddress
                     })
                     const adminOrderGroup = await AdminOrder.findOne({orderDate: today})
                     adminOrderGroup.orderList.push(newOrder._id)
@@ -185,6 +198,7 @@ export const addUserOrder = async (req, res) => {
         cart.save()
         res.status(200).json({message: "Order Placed Successfully"})
     } catch(error){
+        console.log(error)
         res.status(500).json({ message: 'Something went wrong'})
     }
 }

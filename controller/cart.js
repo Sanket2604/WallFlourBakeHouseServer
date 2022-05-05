@@ -46,6 +46,7 @@ export const addItemToCart = async (req,res) => {
     try{
         const existingUser = await User.findOne({ _id: req.userId })
         if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
+        if(body.preOrder==='') return res.status(400).json({ message: "Select Delivery Date" })
         const cart = await Cart.findOne({user: req.userId})
         const product = await Products.findById(body.productId)
         if(!product) return res.status(404).json({ message: "Product doesn't exist" })

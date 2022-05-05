@@ -1,6 +1,9 @@
 import User from '../models/user.js'
 import Comment from '../models/comment.js'
 import DP from '../models/displayPic.js'
+import Order from '../models/order.js'
+import Cart from '../models/cart.js'
+import Message from '../models/messages.js'
 
 export const allUserData = async(req, res) => {
 
@@ -17,8 +20,32 @@ export const oneUserData = async(req, res) => {
 
     try{
         const oneUser = await User.findById(req.params.userId).populate('comments').populate('favourites')
-        res.status(200).json(oneUser)
+        const userActiveOrders = await Order.find({username: oneUser.username})
+        let activeOrders = userActiveOrders.filter(order=>{
+            return order.status!=="Delivered"
+        })
+        res.status(200).json({oneUser, activeOrders})
     } catch(error){
+        res.status(500).json({ message: 'Something went wrong'})
+    }
+}
+
+export const deleteUserData = async(req, res) => {
+
+    try{
+        const oneUser = await User.findById(req.params.userId)
+        if(oneUser.comments.length>0) return res.status(500).json({ message: 'Delete All Comments Posted By User'})
+        const userActiveOrders = await Order.find({username: oneUser.username})
+        let activeOrders = userActiveOrders.filter(order=>{
+            return order.status!=="Delivered"
+        })
+        if(activeOrders.length>0) return res.status(500).json({ message: 'Delete All Active Orders of The User'})
+        await User.findByIdAndDelete(req.params.userId)
+        await Cart.findOneAndDelete({user: req.params.userId})
+        await Message.findOneAndDelete({user: req.params.userId})
+        res.status(200).json({ message: 'User Deleted' })
+    } catch(error){
+        console.log(error)
         res.status(500).json({ message: 'Something went wrong'})
     }
 }

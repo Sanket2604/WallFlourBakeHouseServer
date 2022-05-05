@@ -27,7 +27,7 @@ export const getActiveOrders = async(req, res) => {
 export const getOneOrder = async(req, res) => {
 
     try{
-        const order = await Order.findById(req.params.orderId).populate('user').populate({ 
+        const order = await Order.findById(req.params.orderId).populate({ 
             path: 'orderItems',
             populate: {
                 path: 'product',
@@ -96,20 +96,31 @@ export const getDeliveredOrders = async(req, res) => {
 export const orderDelete = async(req, res) => {
 
     try{
-        const order = await Order.findById(req.params.orderId).populate('orderList')
-        await Promise.all(order.orderList.map(async item => {
+        const orderToDelete = await Order.findById(req.params.orderId)
+        const orderDate = moment(orderToDelete.createdAt).format("DD/MM/YYYY")
+        const allDatesOrders = await AdminOrder.findOne({orderDate: orderDate})
+        let pos
+        allDatesOrders.orderList.map((order,i)=>{
+            if(orderToDelete._id.toString()===order.toString()){
+                pos=i
+            }
+        })
+        allDatesOrders.orderList.splice(pos,1)
+        await Promise.all(orderToDelete.orderItems.map(async item => {
             try{
-                const product = await Product.findById(item.product)
+                const product = await Product.findOne({productName: item.productName})
                 product.unitsSold-=item.quantity
                 product.save()
             }
             catch(error){
-                return res.status(500).json({ message: 'Something went wrong'})
+                throw error
             }
         }))
+        allDatesOrders.save()
         await Order.findByIdAndDelete(req.params.orderId)
         res.status(200).json({ message: 'Order Deleted'})
     } catch(error){
+        console.log(error)
         res.status(500).json({ message: 'Something went wrong'})
     }
 }
