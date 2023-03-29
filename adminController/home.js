@@ -83,7 +83,7 @@ export const changeOrderControl = async(req, res) => {
 
     try{
         const orderControl = await OrderControl.find()
-        orderControl[0].status=!orderControl[0].status
+        orderControl[0].status=!orderControl[0]?.status
         await orderControl[0].save()
         res.status(200).json({ message: "Order Control Updated"})
     } catch(error){
