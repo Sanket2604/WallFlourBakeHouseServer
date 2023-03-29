@@ -18,7 +18,7 @@ app.use(bodyparser.json({ limit: "100mb", extended: true }));
 app.use(bodyparser.urlencoded({ limit: "100mb", extended: true }));
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://tourmaline-frangollo-bf587b.netlify.app'],
+    origin: ['http://localhost:3000', 'https://tourmaline-frangollo-bf587b.netlify.app', 'https://incredible-cobbler-03178d.netlify.app'],
     method: ['GET', 'POST', 'PUT', 'DELETE'],
     optionsSuccessStatus: 200
 }));
