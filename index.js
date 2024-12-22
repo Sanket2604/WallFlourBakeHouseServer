@@ -18,13 +18,13 @@ app.use(bodyparser.json({ limit: "100mb", extended: true }));
 app.use(bodyparser.urlencoded({ limit: "100mb", extended: true }));
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://tourmaline-frangollo-bf587b.netlify.app', 'https://incredible-cobbler-03178d.netlify.app'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'https://tourmaline-frangollo-bf587b.netlify.app', 'https://incredible-cobbler-03178d.netlify.app'],
     method: ['GET', 'POST', 'PUT', 'DELETE'],
     optionsSuccessStatus: 200
 }));
 app.options('*', cors())
 
-const CONNECTION_URL = 'mongodb+srv://sanket:GF4ktqOZ6sI7xWYG@bakery.nez0l5g.mongodb.net/?retryWrites=true&w=majority'
+const CONNECTION_URL = 'mongodb+srv://sanket:2HH0tFyitsPS3Yvx@bakery.m0dah.mongodb.net/'
 const PORT = process.env.PORT || 5000;
 
 app.use('/user', userRoutes)
